@@ -9,6 +9,9 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
 {
     public TextMeshProUGUI playerCountText;
     public GameObject playerPrefab;
+    public Button MapButton; 
+    public Button ExitMapButton; 
+    public Image Map;
     public Image HammerIMG;
     public Image FanIMG;
     public Image TorchIMG;
@@ -28,6 +31,12 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         FanIMG.color = new Color(0f, 0f, 0f, 1f); 
         TorchIMG.color = new Color(0f, 0f, 0f, 1f); 
         BotleIMG.color = new Color(0f, 0f, 0f, 1f); 
+
+        MapButton.onClick.AddListener(OpenMap);
+        ExitMapButton.onClick.AddListener(CloseMap);
+
+        ExitMapButton.gameObject.SetActive(false);
+        Map.gameObject.SetActive(false);
     }
 
     void Update()
@@ -84,6 +93,20 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         SceneManager.LoadScene("MainMenuScene");
+    }
+    public void OpenMap()
+    {
+        ExitMapButton.gameObject.SetActive(true);
+        Map.gameObject.SetActive(true);
+        MapButton.interactable = false;
+    }
+
+    // ฟังก์ชันปิดแผนที่สำหรับผู้เล่นที่กดปุ่ม
+    public void CloseMap()
+    {
+        ExitMapButton.gameObject.SetActive(false);
+        Map.gameObject.SetActive(false);
+        MapButton.interactable = true;
     }
 
     public void FindHammer()
