@@ -10,7 +10,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public Image player2Image;  // รูปภาพของผู้เล่นคนที่ 2
     public Button startButton;  // ปุ่มเริ่มเกม
     public Button leaveButton;  // ปุ่มออกจากห้อง
-     private bool isLeavingRoom = false;  // ตัวแปรเพื่อป้องกันการออกจากห้องซ้ำ
+    private bool isLeavingRoom = false;  // ตัวแปรเพื่อป้องกันการออกจากห้องซ้ำ
     public Image player1Target;  // รูปภาพของเจ้าของห้อง (Master Client)
     public Image player2Target;  // รูปภาพของผู้เล่นคนอื่น
 
@@ -121,7 +121,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient)
         {
             Debug.Log("เริ่มเกมโดย Master Client");
-            PhotonNetwork.LoadLevel("Level1TutorialScene"); // ทุกคนในห้องจะถูกซิงโครไนซ์ไปยัง Scene "Level1TutorialScene"
+            PhotonNetwork.LoadLevel("StoryScene"); // ทุกคนในห้องจะถูกซิงโครไนซ์ไปยัง Scene "Level1TutorialScene"
         }
         else
         {
