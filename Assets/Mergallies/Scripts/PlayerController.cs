@@ -26,14 +26,11 @@ public class PlayerController : MonoBehaviourPun
 
     void Update()
     {
-        if (photonView.IsMine)
-        {
-            // ควบคุม Player Object เดียวกันโดยทุกคนสามารถบังคับได้
-            Move();
+        // ทุกคนสามารถควบคุม Player Object ได้
+        Move();
 
-            // แสดงค่าตำแหน่งของผู้เล่นใน UI
-            test.text = "X: " + playerRigidbody.position.x + " , Y: " + playerRigidbody.position.y;
-        }
+        // แสดงค่าตำแหน่งของผู้เล่นใน UI
+        test.text = "X: " + playerRigidbody.position.x + " , Y: " + playerRigidbody.position.y;
     }
 
     void Move()
