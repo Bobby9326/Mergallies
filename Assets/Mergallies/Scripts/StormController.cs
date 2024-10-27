@@ -1,6 +1,7 @@
+using Photon.Pun;
 using UnityEngine;
 
-public class StormController : MonoBehaviour
+public class StormController : MonoBehaviourPun
 {
     public float moveSpeed = 1f; // ความเร็วในการเคลื่อนที่
     public float moveRange = 10f; // ขอบเขตการเคลื่อนที่ไม่เกิน ±10
@@ -11,8 +12,12 @@ public class StormController : MonoBehaviour
     {
         // บันทึกตำแหน่งเริ่มต้น
         startPosition = transform.position;
-        // สุ่มตำแหน่งเป้าหมายในขอบเขต
-        GenerateRandomTarget();
+        
+        if (PhotonNetwork.IsMasterClient)
+        {
+            // เฉพาะ MasterClient จะสุ่มตำแหน่งใหม่
+            GenerateRandomTarget();
+        }
     }
 
     void Update()
@@ -21,7 +26,7 @@ public class StormController : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
 
         // หากถึงตำแหน่งเป้าหมายแล้วให้สุ่มตำแหน่งใหม่
-        if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
+        if (PhotonNetwork.IsMasterClient && Vector3.Distance(transform.position, targetPosition) < 0.1f)
         {
             GenerateRandomTarget();
         }
@@ -33,5 +38,15 @@ public class StormController : MonoBehaviour
         float randomX = Random.Range(startPosition.x - moveRange, startPosition.x + moveRange);
         float randomY = Random.Range(startPosition.y - moveRange, startPosition.y + moveRange);
         targetPosition = new Vector3(randomX, randomY, startPosition.z); // เก็บตำแหน่งเป้าหมายใหม่
+
+        // ส่งตำแหน่งใหม่ให้กับผู้เล่นคนอื่น
+        photonView.RPC("SetTargetPosition", RpcTarget.All, targetPosition);
+    }
+
+    // RPC สำหรับตั้งค่าตำแหน่งเป้าหมายใหม่
+    [PunRPC]
+    void SetTargetPosition(Vector3 newPosition)
+    {
+        targetPosition = newPosition;
     }
 }
