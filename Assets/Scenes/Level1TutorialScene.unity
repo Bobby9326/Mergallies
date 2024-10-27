@@ -540,8 +540,9 @@ GameObject:
   - component: {fileID: 546945880}
   - component: {fileID: 546945882}
   - component: {fileID: 546945883}
+  - component: {fileID: 546945884}
   m_Layer: 0
-  m_Name: Square
+  m_Name: player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -570,7 +571,7 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
@@ -659,7 +660,7 @@ MonoBehaviour:
   playerRigidbody: {fileID: 546945876}
   test: {fileID: 96178932}
   animator: {fileID: 546945882}
-  moveSpeed: 5
+  moveSpeed: 10
   gameManager: {fileID: 968478101}
 --- !u!114 &546945880
 MonoBehaviour:
@@ -692,11 +693,12 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
+  Synchronization: 1
   OwnershipTransfer: 1
-  observableSearch: 2
+  observableSearch: 0
   ObservedComponents:
   - {fileID: 546945880}
+  - {fileID: 546945884}
   sceneViewId: 1
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -759,6 +761,30 @@ CapsuleCollider2D:
   m_Offset: {x: -0.12, y: -3.3}
   m_Size: {x: 3.6, y: 1.53}
   m_Direction: 1
+--- !u!114 &546945884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 546945875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowLayerWeightsInspector: 1
+  ShowParameterInspector: 1
+  m_SynchronizeParameters:
+  - Type: 4
+    SynchronizeType: 1
+    Name: IsRunning
+  - Type: 1
+    SynchronizeType: 2
+    Name: MoveX
+  m_SynchronizeLayers:
+  - SynchronizeType: 0
+    LayerIndex: 0
 --- !u!1 &549101779
 GameObject:
   m_ObjectHideFlags: 0
