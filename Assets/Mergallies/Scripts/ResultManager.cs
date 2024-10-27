@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Photon.Pun;
+using Photon.Realtime;
 
 public class ResultManager : MonoBehaviour
 {
@@ -8,6 +10,7 @@ public class ResultManager : MonoBehaviour
 
     void Start()
     {
+        PhotonNetwork.AutomaticallySyncScene = false;
         // ตรวจสอบว่าได้เชื่อมโยงปุ่มใน Inspector หรือไม่
         if (backToMainMenuButton != null)
         {

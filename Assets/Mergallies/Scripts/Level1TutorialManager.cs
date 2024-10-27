@@ -18,6 +18,7 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
     private bool findFan = false; 
     private bool findTorch = false; 
     private bool findBottle = false; 
+    private bool isSceneLoading = false; 
 
     void Start()
     {
@@ -119,7 +120,33 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         if (findHammer && findFan && findTorch && findBottle)
         {
             Debug.Log("พบของครบทั้ง 4 ชิ้นแล้ว!");
-            PhotonNetwork.LoadLevel("ResultScene"); // เปลี่ยนไปยังหน้าจบเกม
+
+            // ตรวจสอบว่าเป็น MasterClient หรือไม่
+            if (PhotonNetwork.IsMasterClient)
+            {
+                photonView.RPC("GoToResultSceneRPC", RpcTarget.All); // เรียกชื่อฟังก์ชัน RPC ที่ถูกต้อง
+            }
         }
     }
+
+
+    [PunRPC] // ทำเครื่องหมายฟังก์ชันนี้ว่าเป็น RPC
+    void GoToResultSceneRPC()
+    {
+        GoToResultScene(); // เรียกฟังก์ชันสำหรับโหลดฉาก
+    }
+
+
+    void GoToResultScene()
+    {
+        // ตรวจสอบว่าฉากกำลังโหลดหรือไม่เพื่อหลีกเลี่ยงการโหลดซ้ำ
+        if (!isSceneLoading)
+        {
+            isSceneLoading = true;  // ตั้งสถานะว่ากำลังโหลดซีน
+            PhotonNetwork.LoadLevel("ResultScene"); // โหลดฉาก ResultScene
+        }
+    }
+
+
+
 }

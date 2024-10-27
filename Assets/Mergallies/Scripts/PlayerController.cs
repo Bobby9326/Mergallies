@@ -9,8 +9,6 @@ public class PlayerController : MonoBehaviourPun
     public Animator animator;     // สำหรับควบคุม Animator
     
     public float moveSpeed = 5f;
-     // ตัวแปรสำหรับตรวจสอบว่าพบ Hammer หรือไม่
-
     public Level1TutorialManager gameManager;
 
     void Start()
@@ -20,34 +18,22 @@ public class PlayerController : MonoBehaviourPun
             playerRigidbody = GetComponent<Rigidbody2D>(); // ลองหาค่าจาก GameObject เอง
         }
 
-        if (playerRigidbody == null)
-        {
-            Debug.LogError("Rigidbody2D ยังไม่ได้รับการกำหนด");
-        }
-
         if (animator == null)
         {
             animator = GetComponent<Animator>(); // ลองหาค่าจาก GameObject เอง
         }
-
-        if (animator == null)
-        {
-            Debug.LogError("Animator ยังไม่ได้รับการกำหนด");
-        }
-
-        
     }
 
     void Update()
     {
-        // ทุกคนควบคุม Player Object เดียวกัน
-        Move();
+        if (photonView.IsMine)
+        {
+            // ควบคุม Player Object เดียวกันโดยทุกคนสามารถบังคับได้
+            Move();
 
-        // แสดงค่าตำแหน่งของผู้เล่นใน UI
-        test.text = "X: " + playerRigidbody.position.x + " , Y: " + playerRigidbody.position.y;
-
-        // แสดงว่าพบ Hammer หรือไม่
-
+            // แสดงค่าตำแหน่งของผู้เล่นใน UI
+            test.text = "X: " + playerRigidbody.position.x + " , Y: " + playerRigidbody.position.y;
+        }
     }
 
     void Move()
@@ -56,66 +42,54 @@ public class PlayerController : MonoBehaviourPun
         float moveX = Input.GetAxis("Horizontal") * moveSpeed;
         float moveY = Input.GetAxis("Vertical") * moveSpeed;
 
-        // อัปเดตการเคลื่อนไหวบนเครื่องผู้เล่น
+        // อัปเดตการเคลื่อนไหวบนเครื่องผู้เล่นที่บังคับ
         playerRigidbody.linearVelocity = new Vector2(moveX, moveY);
 
-        // ส่งข้อมูลการเคลื่อนไหวไปยังผู้เล่นคนอื่นผ่าน RPC
-        photonView.RPC("SyncMovement", RpcTarget.Others, moveX, moveY);
+        // ส่งข้อมูลการเคลื่อนไหวและการอัปเดต Animator ไปยังผู้เล่นคนอื่นผ่าน RPC
+        photonView.RPC("SyncMovement", RpcTarget.Others, moveX, moveY, moveX != 0 || moveY != 0);
 
-        // อัปเดตการทำงานของ Animator
-        UpdateAnimator(moveX, moveY);
+        // อัปเดตการทำงานของ Animator สำหรับตัวผู้เล่นเอง
+        UpdateAnimator(moveX, moveY, moveX != 0 || moveY != 0);
     }
 
-    void UpdateAnimator(float moveX, float moveY)
+    void UpdateAnimator(float moveX, float moveY, bool isRunning)
     {
-        // ตรวจสอบว่าผู้เล่นกำลังวิ่งหรือไม่
-        bool isRunning = (moveX != 0 || moveY != 0);
         animator.SetBool("IsRunning", isRunning); // กำหนดค่าของ IsRunning
-
-        // กำหนดค่าของ MoveX
-        animator.SetFloat("MoveX", moveX);
+        animator.SetFloat("MoveX", moveX); // กำหนดค่าของ MoveX
     }
-
-    // ฟังก์ชันเมื่อชนกับวัตถุที่มี Collider2D
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        Debug.Log("ชนกับวัตถุ: " + collision.gameObject.name);  // เพิ่ม Debug เพื่อตรวจสอบการชน
-
-        if (collision.gameObject.CompareTag("Hammer"))
-        {
-            Debug.Log("พบ Hammer!"); 
-            gameManager.FindHammer();
-            Destroy(collision.gameObject);
-        }
-        if (collision.gameObject.CompareTag("Torch"))
-        {
-            Debug.Log("พบ Torch!"); 
-            gameManager.FindTorch();
-            Destroy(collision.gameObject);
-        }
-        if (collision.gameObject.CompareTag("Fan"))
-        {
-            Debug.Log("พบ Fan!"); 
-            gameManager.FindFan();
-            Destroy(collision.gameObject);
-        }
-        if (collision.gameObject.CompareTag("Bottle"))
-        {
-            Debug.Log("พบ Bottle!"); 
-            gameManager.FindBottle();
-            Destroy(collision.gameObject);
-        }
-    }
-
-    // RPC สำหรับทำลายวัตถุ Hammer
 
     [PunRPC]
-    void SyncMovement(float moveX, float moveY)
+    void SyncMovement(float moveX, float moveY, bool isRunning)
     {
         // รับข้อมูลความเร็วจากผู้เล่นคนอื่นและอัปเดตการเคลื่อนไหว
         playerRigidbody.linearVelocity = new Vector2(moveX, moveY);
 
         // อัปเดตการทำงานของ Animator บนผู้เล่นคนอื่น ๆ ด้วย
-        UpdateAnimator(moveX, moveY);
+        UpdateAnimator(moveX, moveY, isRunning);
+    }
+
+    // ฟังก์ชันเมื่อชนกับวัตถุที่มี Collider2D
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Hammer"))
+        {
+            gameManager.FindHammer();
+            Destroy(collision.gameObject);
+        }
+        else if (collision.gameObject.CompareTag("Torch"))
+        {
+            gameManager.FindTorch();
+            Destroy(collision.gameObject);
+        }
+        else if (collision.gameObject.CompareTag("Fan"))
+        {
+            gameManager.FindFan();
+            Destroy(collision.gameObject);
+        }
+        else if (collision.gameObject.CompareTag("Bottle"))
+        {
+            gameManager.FindBottle();
+            Destroy(collision.gameObject);
+        }
     }
 }
