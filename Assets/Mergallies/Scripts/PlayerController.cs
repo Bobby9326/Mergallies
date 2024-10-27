@@ -92,5 +92,12 @@ public class PlayerController : MonoBehaviourPun
             gameManager.FindBottle();
             Destroy(collision.gameObject);
         }
+        else if (collision.gameObject.CompareTag("Obstacle"))
+        {
+            // ตั้งตำแหน่งของผู้เล่นไปที่ (0, 0)
+            Debug.Log("find : Obstacle");
+            transform.position = new Vector3(0, 0, 0);
+        }
+
     }
 }
