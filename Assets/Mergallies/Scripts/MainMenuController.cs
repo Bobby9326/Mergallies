@@ -3,87 +3,65 @@ using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
+using System.Collections; // เพิ่มการใช้งาน IEnumerator และ Coroutine
 
 public class MainMenuController : MonoBehaviourPunCallbacks
 {
     public Button createRoomButton;  // ปุ่มสำหรับสร้างห้อง
     public Button joinRoomButton;    // ปุ่มสำหรับเข้าร่วมห้อง
-    private bool isConnectedToLobby = false;  // ตัวแปรเพื่อตรวจสอบว่าต่อกับล็อบบี้สำเร็จแล้วหรือยัง
-    private bool isConnectedToMaster = false; // ตัวแปรเพื่อตรวจสอบว่าต่อกับ Master Server สำเร็จแล้วหรือยัง
-    private bool isTryingToCreateRoom = false;  // ตัวแปรเพื่อตรวจสอบว่ากำลังพยายามสร้างห้องหรือไม่
+    public Button joinInputButton; 
+    public Button createInputButton; 
+    public TMP_InputField joininputField;  // ใช้ TMP_InputField
+    public TMP_InputField createinputField; // ใช้ TMP_InputField
+    public Image joinInput;
+    public Image createInput;
+
+    private bool isConnectedToLobby = false;  // ตรวจสอบการเชื่อมต่อกับล็อบบี้
+    private bool isConnectedToMaster = false; // ตรวจสอบการเชื่อมต่อกับ Master Server
+    private bool isTryingToCreateRoom = false;  // ตรวจสอบว่ากำลังพยายามสร้างห้องหรือไม่
     private bool isSceneLoading = false; // ตรวจสอบการโหลดซีน
 
     private void Start()
     {
+        Debug.Log(PhotonNetwork.NickName);
+        // ตรวจสอบการเชื่อมโยงวัตถุเพื่อป้องกัน NullReferenceException
+        if (createRoomButton == null || joinRoomButton == null || joinInputButton == null || createInputButton == null || 
+            joininputField == null || createinputField == null || joinInput == null || createInput == null)
+        {
+            Debug.LogError("Some UI components are not assigned in the Inspector.");
+            return;
+        }
+
+        // ซ่อน InputField ทั้งสองเมื่อเริ่มต้น
+        joinInput.gameObject.SetActive(false);
+        createInput.gameObject.SetActive(false);
+
         // เชื่อมฟังก์ชันกับปุ่ม
-        createRoomButton.onClick.AddListener(() => {
-            isTryingToCreateRoom = true;  // กำลังพยายามสร้างห้อง
-            TryCreateRoom();
-        });
-        joinRoomButton.onClick.AddListener(JoinRoom);
+        createRoomButton.onClick.AddListener(ShowCreateRoomInput);
+        createInputButton.onClick.AddListener(CreateRoomOnClick);
+        joinRoomButton.onClick.AddListener(ShowJoinRoomInput);
+        joinInputButton.onClick.AddListener(JoinRoomOnClick);
     }
 
-    private void Awake()
+    private void ShowCreateRoomInput()
     {
-        // ตรวจสอบสถานะการเชื่อมต่อก่อนที่จะทำการเชื่อมต่อใหม่
-        if (PhotonNetwork.NetworkClientState == ClientState.Disconnected)
-        {
-            PhotonNetwork.ConnectUsingSettings(); // เริ่มการเชื่อมต่อกับ Photon
-            Debug.Log("กำลังเชื่อมต่อกับ Photon...");
-        }
-        else
-        {
-            Debug.LogWarning("ไคลเอนต์เชื่อมต่ออยู่แล้ว ไม่จำเป็นต้องเชื่อมต่อใหม่");
-        }
+        createInput.gameObject.SetActive(true);  // แสดง Input สำหรับการสร้างห้อง
     }
 
-    // ฟังก์ชันสำหรับตรวจสอบและพยายามสร้างห้อง
-    public void TryCreateRoom()
+    private void CreateRoomOnClick()
     {
-        if (isConnectedToMaster && isConnectedToLobby)
-        {
-            CreateRoom();
-        }
-        else if (!isConnectedToMaster)
-        {
-            Debug.LogError("ไม่สามารถสร้างห้องได้ ไคลเอนต์ยังไม่ได้เชื่อมต่อกับ Master Server");
-        }
-        else if (!isConnectedToLobby)
-        {
-            Debug.LogError("ไม่สามารถสร้างห้องได้ ไคลเอนต์ยังไม่ได้เชื่อมต่อกับล็อบบี้");
-        }
+        PhotonNetwork.CreateRoom(createinputField.text);
     }
 
-    // ฟังก์ชันสำหรับสร้างห้อง
-    public void CreateRoom()
+    private void ShowJoinRoomInput()
     {
-        Debug.Log("พยายามสร้างห้อง...");
-
-        RoomOptions roomOptions = new RoomOptions();
-        roomOptions.MaxPlayers = 2; // จำกัดจำนวนผู้เล่นในห้องให้ได้เพียง 2 คน
-
-        if (PhotonNetwork.IsConnectedAndReady && PhotonNetwork.NetworkClientState == ClientState.JoinedLobby)
-        {
-            PhotonNetwork.CreateRoom(null, roomOptions, null); // สร้างห้องใหม่แบบไม่มีชื่อเฉพาะ
-        }
-        else
-        {
-            Debug.LogError("ไคลเอนต์ยังไม่พร้อมที่จะสร้างห้อง กรุณารอสักครู่...");
-        }
+        joinInput.gameObject.SetActive(true);  // แสดง Input สำหรับการเข้าร่วมห้อง
     }
 
-    // ฟังก์ชันสำหรับเข้าร่วมห้อง
-    public void JoinRoom()
+    private void JoinRoomOnClick()
     {
-        Debug.Log("พยายามเข้าร่วมห้อง...");
-        PhotonNetwork.JoinRandomRoom(); // เข้าร่วมห้องแบบสุ่ม
-    }
-
-    // ฟังก์ชันที่ถูกเรียกเมื่อเข้าร่วมห้องล้มเหลว
-    public override void OnJoinRandomFailed(short returnCode, string message)
-    {
-        Debug.Log("การเข้าร่วมห้องล้มเหลว: " + message);
-        TryCreateRoom(); // ถ้าไม่มีห้องให้เข้าร่วม ก็สร้างห้องใหม่
+        PhotonNetwork.JoinRoom(joininputField.text);
     }
 
     // ฟังก์ชันที่ถูกเรียกเมื่อเข้าร่วมห้องสำเร็จ
@@ -92,6 +70,7 @@ public class MainMenuController : MonoBehaviourPunCallbacks
         Debug.Log("เข้าห้องสำเร็จ!");
 
         // ตรวจสอบว่ากำลังโหลดซีนอยู่หรือไม่
+        
         if (!isSceneLoading)
         {
             isSceneLoading = true;  // ตั้งสถานะว่ากำลังโหลดซีน
@@ -103,51 +82,4 @@ public class MainMenuController : MonoBehaviourPunCallbacks
         }
     }
 
-    // ฟังก์ชันที่ถูกเรียกเมื่อเชื่อมต่อกับ Master Server สำเร็จ
-    public override void OnConnectedToMaster()
-    {
-        Debug.Log("เชื่อมต่อกับ Master Server สำเร็จ");
-        isConnectedToMaster = true; // ตอนนี้ไคลเอนต์เชื่อมต่อกับ Master Server สำเร็จแล้ว
-
-        if (!isConnectedToLobby)
-        {
-            PhotonNetwork.JoinLobby();  // เข้าร่วมล็อบบี้หลังจากเชื่อมต่อสำเร็จ
-        }
-    }
-
-    // ฟังก์ชันที่ถูกเรียกเมื่อเชื่อมต่อกับล็อบบี้สำเร็จ
-    public override void OnJoinedLobby()
-    {
-        Debug.Log("เข้าสู่ล็อบบี้สำเร็จ");
-        isConnectedToLobby = true;  // ตอนนี้ไคลเอนต์เชื่อมต่อกับล็อบบี้สำเร็จแล้ว
-
-        // ถ้ากำลังพยายามสร้างห้องหลังจากเชื่อมต่อสำเร็จ
-        if (isTryingToCreateRoom)
-        {
-            CreateRoom();  // สร้างห้องหลังจากเข้าล็อบบี้สำเร็จ
-            isTryingToCreateRoom = false;  // รีเซ็ตสถานะการสร้างห้อง
-        }
-    }
-
-    // ฟังก์ชันที่ถูกเรียกเมื่อออกจากห้องสำเร็จ
-    public override void OnLeftRoom()
-    {
-        Debug.Log("ออกจากห้องสำเร็จ! กำลังกลับไปที่ Master Server...");
-        isSceneLoading = false;  // รีเซ็ตสถานะการโหลดซีน
-        PhotonNetwork.Disconnect();  // ตัดการเชื่อมต่อจาก GameServer เพื่อเชื่อมต่อกับ Master Server ใหม่
-    }
-
-    // ฟังก์ชันที่ถูกเรียกเมื่อการเชื่อมต่อขาด
-    public override void OnDisconnected(DisconnectCause cause)
-    {
-        Debug.LogError("การเชื่อมต่อขาดจาก Photon: " + cause.ToString());
-        isConnectedToMaster = false; // รีเซ็ตสถานะการเชื่อมต่อกับ Master Server
-        isConnectedToLobby = false;  // รีเซ็ตสถานะการเชื่อมต่อกับล็อบบี้
-
-        // เชื่อมต่อกลับไปที่ Master Server หลังจากตัดการเชื่อมต่อจาก GameServer
-        if (cause == DisconnectCause.DisconnectByClientLogic || cause == DisconnectCause.ClientTimeout)
-        {
-            PhotonNetwork.ConnectUsingSettings(); // เชื่อมต่อกลับไปยัง Master Server
-        }
-    }
 }

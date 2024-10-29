@@ -6,6 +6,7 @@ using TMPro;
 
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
+    public TextMeshProUGUI roomName;
     public Image player1Image;  // รูปภาพของผู้เล่นคนที่ 1
     public Image player2Image;  // รูปภาพของผู้เล่นคนที่ 2
     public Button startButton;  // ปุ่มเริ่มเกม
@@ -26,6 +27,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         if (leaveButton != null)
         {
             leaveButton.onClick.AddListener(LeaveLobby);
+        }
+        if (roomName != null && PhotonNetwork.CurrentRoom != null)
+        {
+            roomName.text = "Room: " + PhotonNetwork.CurrentRoom.Name;
         }
     }
 
