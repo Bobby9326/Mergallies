@@ -7,6 +7,9 @@ using TMPro;
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
     public TextMeshProUGUI roomName;
+    public TextMeshProUGUI player1Name;
+    public TextMeshProUGUI player2Name;
+
     public Image player1Image;  // รูปภาพของผู้เล่นคนที่ 1
     public Image player2Image;  // รูปภาพของผู้เล่นคนที่ 2
     public Button startButton;  // ปุ่มเริ่มเกม
@@ -41,8 +44,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         // Debug สถานะของ Photon เพื่อดูว่ามีปัญหาการเชื่อมต่อหรือไม่
         Debug.Log("สถานะของ Photon: " + PhotonNetwork.NetworkClientState);
-
-        // ตรวจสอบว่าห้องถูกสร้างหรือเข้าร่วมห้องแล้วหรือยัง
+        
+        UpdatePlayerNames();
 
 
         if (PhotonNetwork.CurrentRoom != null)
@@ -91,6 +94,26 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
         
 
+    }
+
+    void UpdatePlayerNames()
+    {
+        // ถ้ามีผู้เล่น 1 คน
+        if (PhotonNetwork.PlayerList.Length > 1)
+        {
+            player1Name.text = PhotonNetwork.PlayerList[0].NickName;
+            player2Name.text = PhotonNetwork.PlayerList[1].NickName;
+        }
+        else if (PhotonNetwork.PlayerList.Length > 0)
+        {
+            player1Name.text = PhotonNetwork.PlayerList[0].NickName;
+            player2Name.text = "";
+        }
+        else
+        {
+            player1Name.text = "";
+            player2Name.text = "";
+        }
     }
 
     // ฟังก์ชันออกจากห้อง
