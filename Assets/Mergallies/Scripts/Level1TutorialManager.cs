@@ -11,7 +11,10 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
     public GameObject playerPrefab;
     public Button MapButton; 
     public Button ExitMapButton; 
+    public Button HintButton; 
+    public Button ExitHintButton; 
     public Image Map;
+    public Image Hint;
     public Image HammerIMG;
     public Image FanIMG;
     public Image TorchIMG;
@@ -34,9 +37,13 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
 
         MapButton.onClick.AddListener(OpenMap);
         ExitMapButton.onClick.AddListener(CloseMap);
+        HintButton.onClick.AddListener(OpenHint);
+        ExitHintButton.onClick.AddListener(CloseHint);
 
         ExitMapButton.gameObject.SetActive(false);
         Map.gameObject.SetActive(false);
+        ExitHintButton.gameObject.SetActive(false);
+        Hint.gameObject.SetActive(false);
     }
 
     void Update()
@@ -106,6 +113,20 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         ExitMapButton.gameObject.SetActive(false);
         Map.gameObject.SetActive(false);
         MapButton.interactable = true;
+    }
+    public void OpenHint()
+    {
+        ExitHintButton.gameObject.SetActive(true);
+        Hint.gameObject.SetActive(true);
+        HintButton.interactable = false;
+    }
+
+    // ฟังก์ชันปิดแผนที่สำหรับผู้เล่นที่กดปุ่ม
+    public void CloseHint()
+    {
+        ExitHintButton.gameObject.SetActive(false);
+        Hint.gameObject.SetActive(false);
+        HintButton.interactable = true;
     }
 
     public void FindHammer()
