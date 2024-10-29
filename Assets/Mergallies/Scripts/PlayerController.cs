@@ -69,6 +69,15 @@ public class PlayerController : MonoBehaviourPun
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Finish"))
+        {
+            gameManager.GoFinish();
+        }
+    }
+
+
     // ฟังก์ชันเมื่อชนกับวัตถุที่มี Collider2D
     private void OnCollisionEnter2D(Collision2D collision)
     {

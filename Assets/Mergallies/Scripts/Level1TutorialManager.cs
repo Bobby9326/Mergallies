@@ -42,7 +42,6 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
     void Update()
     {
         UpdatePlayerCount();
-        CheckIfAllItemsFound(); // ตรวจสอบว่าพบของครบแล้วหรือยัง
     }
 
     void UpdatePlayerCount()
@@ -113,28 +112,43 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
     {
         findHammer = true;
         HammerIMG.color = new Color(1f, 1f, 1f, 1f); 
-        CheckIfAllItemsFound();  // ตรวจสอบทุกครั้งเมื่อพบไอเทมใหม่
+
     }
 
     public void FindFan()
     {
         findFan = true;
         FanIMG.color = new Color(1f, 1f, 1f, 1f); 
-        CheckIfAllItemsFound();
+
     }
 
     public void FindTorch()
     {
         findTorch = true;
         TorchIMG.color = new Color(1f, 1f, 1f, 1f); 
-        CheckIfAllItemsFound();
+
     }
 
     public void FindBottle()
     {
         findBottle = true;
         BotleIMG.color = new Color(1f, 1f, 1f, 1f); 
-        CheckIfAllItemsFound();
+
+    }
+
+    public void GoFinish()
+    {
+        Debug.Log("พบ Spawn");
+        if (findHammer && findFan && findTorch && findBottle)
+        {
+            
+
+            // ตรวจสอบว่าเป็น MasterClient หรือไม่
+            if (PhotonNetwork.IsMasterClient)
+            {
+                photonView.RPC("GoToResultSceneRPC", RpcTarget.All); // เรียกชื่อฟังก์ชัน RPC ที่ถูกต้อง
+            }
+        }
     }
 
     // ฟังก์ชันตรวจสอบว่าพบของครบ 4 ชิ้นหรือยัง
