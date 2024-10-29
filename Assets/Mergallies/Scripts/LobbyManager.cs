@@ -27,10 +27,9 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
         PhotonNetwork.AutomaticallySyncScene = true;
 
-        if (leaveButton != null)
-        {
-            leaveButton.onClick.AddListener(LeaveLobby);
-        }
+        leaveButton.onClick.AddListener(LeaveLobby);
+        startButton.onClick.AddListener(StartGame);
+
         if (roomName != null && PhotonNetwork.CurrentRoom != null)
         {
             roomName.text = "Room: " + PhotonNetwork.CurrentRoom.Name;
@@ -44,7 +43,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         // Debug สถานะของ Photon เพื่อดูว่ามีปัญหาการเชื่อมต่อหรือไม่
         Debug.Log("สถานะของ Photon: " + PhotonNetwork.NetworkClientState);
-        
+
         UpdatePlayerNames();
 
 
