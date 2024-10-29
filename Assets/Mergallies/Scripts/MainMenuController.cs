@@ -51,7 +51,10 @@ public class MainMenuController : MonoBehaviourPunCallbacks
 
     private void CreateRoomOnClick()
     {
-        PhotonNetwork.CreateRoom(createinputField.text);
+        RoomOptions roomOptions = new RoomOptions();
+        roomOptions.MaxPlayers = 2;
+        PhotonNetwork.CreateRoom(createinputField.text, roomOptions, null);
+
     }
 
     private void ShowJoinRoomInput()
