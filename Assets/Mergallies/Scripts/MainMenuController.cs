@@ -4,49 +4,57 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
-using System.Collections; // เพิ่มการใช้งาน IEnumerator และ Coroutine
+using System.Collections;
 
 public class MainMenuController : MonoBehaviourPunCallbacks
 {
-    public Button createRoomButton;  // ปุ่มสำหรับสร้างห้อง
-    public Button joinRoomButton;    // ปุ่มสำหรับเข้าร่วมห้อง
-    public Button joinInputButton; 
-    public Button createInputButton; 
-    public TMP_InputField joininputField;  // ใช้ TMP_InputField
-    public TMP_InputField createinputField; // ใช้ TMP_InputField
+    public Button createRoomButton;
+    public Button joinRoomButton;
+    public Button joinInputButton;
+    public Button createInputButton;
+    public Button joinExitButton;
+    public Button createExitButton;
+    public Button exitGameButton;
+    public TMP_InputField joininputField;
+    public TMP_InputField createinputField;
     public Image joinInput;
     public Image createInput;
 
-    private bool isConnectedToLobby = false;  // ตรวจสอบการเชื่อมต่อกับล็อบบี้
-    private bool isConnectedToMaster = false; // ตรวจสอบการเชื่อมต่อกับ Master Server
-    private bool isTryingToCreateRoom = false;  // ตรวจสอบว่ากำลังพยายามสร้างห้องหรือไม่
-    private bool isSceneLoading = false; // ตรวจสอบการโหลดซีน
+    private bool isConnectedToLobby = false;
+    private bool isConnectedToMaster = false;
+    private bool isTryingToCreateRoom = false;
+    private bool isSceneLoading = false;
 
     private void Start()
     {
         Debug.Log(PhotonNetwork.NickName);
-        // ตรวจสอบการเชื่อมโยงวัตถุเพื่อป้องกัน NullReferenceException
+        
         if (createRoomButton == null || joinRoomButton == null || joinInputButton == null || createInputButton == null || 
-            joininputField == null || createinputField == null || joinInput == null || createInput == null)
+            joininputField == null || createinputField == null || joinInput == null || createInput == null || exitGameButton == null)
         {
             Debug.LogError("Some UI components are not assigned in the Inspector.");
             return;
         }
 
-        // ซ่อน InputField ทั้งสองเมื่อเริ่มต้น
         joinInput.gameObject.SetActive(false);
         createInput.gameObject.SetActive(false);
 
-        // เชื่อมฟังก์ชันกับปุ่ม
         createRoomButton.onClick.AddListener(ShowCreateRoomInput);
         createInputButton.onClick.AddListener(CreateRoomOnClick);
         joinRoomButton.onClick.AddListener(ShowJoinRoomInput);
         joinInputButton.onClick.AddListener(JoinRoomOnClick);
+        joinExitButton.onClick.AddListener(UnShowJoinRoomInput);
+        createExitButton.onClick.AddListener(UnShowCreateRoomInput);
+        exitGameButton.onClick.AddListener(QuitGame);
     }
 
     private void ShowCreateRoomInput()
     {
-        createInput.gameObject.SetActive(true);  // แสดง Input สำหรับการสร้างห้อง
+        createInput.gameObject.SetActive(true);
+    }
+    private void UnShowCreateRoomInput()
+    {
+        createInput.gameObject.SetActive(false);
     }
 
     private void CreateRoomOnClick()
@@ -54,12 +62,15 @@ public class MainMenuController : MonoBehaviourPunCallbacks
         RoomOptions roomOptions = new RoomOptions();
         roomOptions.MaxPlayers = 2;
         PhotonNetwork.CreateRoom(createinputField.text, roomOptions, null);
-
     }
 
     private void ShowJoinRoomInput()
     {
-        joinInput.gameObject.SetActive(true);  // แสดง Input สำหรับการเข้าร่วมห้อง
+        joinInput.gameObject.SetActive(true);
+    }
+    private void UnShowJoinRoomInput()
+    {
+        joinInput.gameObject.SetActive(false);
     }
 
     private void JoinRoomOnClick()
@@ -67,17 +78,14 @@ public class MainMenuController : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinRoom(joininputField.text);
     }
 
-    // ฟังก์ชันที่ถูกเรียกเมื่อเข้าร่วมห้องสำเร็จ
     public override void OnJoinedRoom()
     {
         Debug.Log("เข้าห้องสำเร็จ!");
 
-        // ตรวจสอบว่ากำลังโหลดซีนอยู่หรือไม่
-        
         if (!isSceneLoading)
         {
-            isSceneLoading = true;  // ตั้งสถานะว่ากำลังโหลดซีน
-            PhotonNetwork.LoadLevel("LobbyScene"); // ไปที่หน้า LobbyScene เมื่อเข้าห้องแล้ว
+            isSceneLoading = true;
+            PhotonNetwork.LoadLevel("LobbyScene");
         }
         else
         {
@@ -85,4 +93,9 @@ public class MainMenuController : MonoBehaviourPunCallbacks
         }
     }
 
+    private void QuitGame()
+    {
+        Debug.Log("ออกจากเกม");
+        Application.Quit();
+    }
 }

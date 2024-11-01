@@ -9,6 +9,7 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
 {
     public TextMeshProUGUI playerCountText;
     public GameObject playerPrefab;
+    public Button LeaveButton; 
     public Button MapButton; 
     public Button ExitMapButton; 
     public Button HintButton; 
@@ -19,22 +20,65 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
     public Image FanIMG;
     public Image TorchIMG;
     public Image BotleIMG;
+    public PlayerController playerManager;
+    public GameObject Rock1;
+    public GameObject Rock2;
+    public GameObject Bridge;
+    public GameObject WrongBridge;
+    public GameObject HorizonBridge;
+    public GameObject HorizonWrongBridge;
     
     private bool findHammer = false; 
     private bool findFan = false; 
     private bool findTorch = false; 
     private bool findBottle = false; 
     private bool isSceneLoading = false; 
+    private Vector3 rock1Position;
+    private Vector3 rock2Position;
+    private int firstBridge;
+    private int secondBridge;
+    private int thirdBridge;
+    public Vector3[] firstPosition;
+    public Vector3[] secondPositions;
+    public Vector3[] thirdPositions;
 
     void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
+        rock1Position = Rock1.transform.position;
+        rock2Position = Rock2.transform.position;
+        firstBridge = Random.Range(1, 4); 
+        secondBridge = Random.Range(1, 4); 
+        thirdBridge = Random.Range(1, 4); 
+
+        firstPosition = new Vector3[]
+        {
+            new Vector3(-27f, -86.99f, 0f),   
+            new Vector3(-24.5f, -86.99f, 0f),  
+            new Vector3(-22f, -86.99f, 0f)
+        };
+
+        secondPositions = new Vector3[]
+        {
+            new Vector3(-34.04f, -89.24f, 0f),   
+            new Vector3(-33.05f, -91.53f, 0f),  
+            new Vector3(-34.04f, -94.24001f, 0f)
+        };
+        thirdPositions = new Vector3[]
+        {
+            new Vector3(-44.02f, -96.97f, 0f),   
+            new Vector3(-41.52f, -96.97f, 0f),  
+            new Vector3(-39.02f, -96.97f, 0f)
+        };
+
         UpdatePlayerCount();
         HammerIMG.color = new Color(0f, 0f, 0f, 1f); 
         FanIMG.color = new Color(0f, 0f, 0f, 1f); 
         TorchIMG.color = new Color(0f, 0f, 0f, 1f); 
         BotleIMG.color = new Color(0f, 0f, 0f, 1f); 
 
+
+        LeaveButton.onClick.AddListener(LeaveRoom);
         MapButton.onClick.AddListener(OpenMap);
         ExitMapButton.onClick.AddListener(CloseMap);
         HintButton.onClick.AddListener(OpenHint);
@@ -44,11 +88,18 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         Map.gameObject.SetActive(false);
         ExitHintButton.gameObject.SetActive(false);
         Hint.gameObject.SetActive(false);
+
+        SetBridge();
     }
 
     void Update()
     {
         UpdatePlayerCount();
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Restart();
+        }
     }
 
     void UpdatePlayerCount()
@@ -95,10 +146,23 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LeaveRoom();
         PhotonNetwork.LoadLevel("MainMenuScene");
     }
+    void LeaveRoom()
+    {
+        Debug.Log(" จะออกแย้ว");
+        PhotonNetwork.LeaveRoom();
+    }
 
     public override void OnLeftRoom()
     {
+        
         SceneManager.LoadScene("MainMenuScene");
+    }
+    public void Restart()
+    {
+        Rock1.transform.position = rock1Position;
+        Rock2.transform.position = rock2Position;
+        SetBridge();
+        playerManager.RePosition();
     }
     public void OpenMap()
     {
@@ -127,6 +191,54 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         ExitHintButton.gameObject.SetActive(false);
         Hint.gameObject.SetActive(false);
         HintButton.interactable = true;
+    }
+
+    public void SetBridge()
+    {
+        GameObject[] fakeWaterObjects = GameObject.FindGameObjectsWithTag("FakeWater");
+        GameObject[] bridgeWaterObjects = GameObject.FindGameObjectsWithTag("Bridge");
+        GameObject[] wrongBridgeWaterObjects = GameObject.FindGameObjectsWithTag("WrongBridge");
+        
+        foreach (GameObject obj in fakeWaterObjects)
+        {
+            Destroy(obj);
+        }
+        foreach (GameObject obj in bridgeWaterObjects)
+        {
+            Destroy(obj);
+        }
+        foreach (GameObject obj in wrongBridgeWaterObjects)
+        {
+            Destroy(obj);
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (i+1 == firstBridge){
+                Instantiate(Bridge, firstPosition[i], Quaternion.identity);
+            }
+            else{
+                Instantiate(WrongBridge, firstPosition[i], Quaternion.identity);
+            }
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            if (i+1 == secondBridge){
+                Instantiate(HorizonBridge, secondPositions[i],  Quaternion.Euler(0, 0, 90));
+            }
+            else{
+                Instantiate(HorizonWrongBridge, secondPositions[i],  Quaternion.Euler(0, 0, 90));
+            }
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            if (i+1 == thirdBridge){
+                Instantiate(Bridge, thirdPositions[i], Quaternion.identity);
+            }
+            else{
+                Instantiate(WrongBridge, thirdPositions[i], Quaternion.identity);
+            }
+        }
     }
 
     public void FindHammer()

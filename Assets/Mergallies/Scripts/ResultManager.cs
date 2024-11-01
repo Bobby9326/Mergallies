@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 
-public class ResultManager : MonoBehaviour
+public class ResultManager : MonoBehaviourPunCallbacks
 {
     public Button backToMainMenuButton;  // ปุ่มสำหรับกลับไปยังหน้า Main Menu
 
@@ -26,6 +26,12 @@ public class ResultManager : MonoBehaviour
     // ฟังก์ชันสำหรับกลับไปหน้า Main Menu
     void GoToMainMenu()
     {
-        SceneManager.LoadScene("MainMenuScene");  // โหลดซีน Main Menu
+        PhotonNetwork.LeaveRoom();
     }
+
+    public override void OnLeftRoom()
+    {
+        PhotonNetwork.LoadLevel("MainMenuScene"); // กลับไปที่หน้า Main Menu
+    }
+
 }

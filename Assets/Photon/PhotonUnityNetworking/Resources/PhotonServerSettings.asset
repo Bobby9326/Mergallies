@@ -50,6 +50,8 @@ MonoBehaviour:
   - SetTargetPosition
   - SpawnFire
   - ChangeToRed
+  - ChangeToWarningSprite
+  - ResetToDefaultSprite
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

@@ -1,6 +1,7 @@
 using Photon.Pun;
-using TMPro;
+using System.Collections;
 using UnityEngine;
+using TMPro;
 
 public class PlayerController : MonoBehaviourPun
 {
@@ -9,6 +10,7 @@ public class PlayerController : MonoBehaviourPun
     public Animator animator;
 
     public float moveSpeed = 5f;
+    public float pushForce = 5f;
     public Level1TutorialManager gameManager;
 
     void Start()
@@ -50,8 +52,6 @@ public class PlayerController : MonoBehaviourPun
 
         // ซิงค์ Animator เพื่อให้ทุกคนเห็นอนิเมชั่นที่ถูกต้อง
         photonView.RPC("UpdateAnimator", RpcTarget.All, moveX, moveY != 0 || moveX != 0);
-
-
     }
 
     // ฟังก์ชันที่ใช้ RPC เพื่อซิงค์อนิเมชัน
@@ -69,14 +69,22 @@ public class PlayerController : MonoBehaviourPun
         }
     }
 
+    public void RePosition()
+    {
+        transform.position = new Vector3(0, 0, 0);
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Finish"))
         {
             gameManager.GoFinish();
         }
+        if (other.CompareTag("WrongBridge"))
+        {
+            transform.position = new Vector3(0, 0, 0);
+        }
     }
-
 
     // ฟังก์ชันเมื่อชนกับวัตถุที่มี Collider2D
     private void OnCollisionEnter2D(Collision2D collision)
@@ -107,6 +115,15 @@ public class PlayerController : MonoBehaviourPun
             Debug.Log("find : Obstacle");
             transform.position = new Vector3(0, 0, 0);
         }
-
+        else if (collision.gameObject.CompareTag("Rock"))
+        {
+            // ดันก้อนหิน
+            Rigidbody2D rockRigidbody = collision.rigidbody;
+            if (rockRigidbody != null)
+            {
+                Vector2 pushDirection = collision.GetContact(0).normal * -1; // หาทิศทางการดัน
+                rockRigidbody.AddForce(pushDirection * pushForce, ForceMode2D.Impulse);
+            }
+        }
     }
 }
