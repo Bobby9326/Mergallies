@@ -12,6 +12,7 @@ public class ResultManager : MonoBehaviourPunCallbacks
     public TextMeshProUGUI NameText;
     public TextMeshProUGUI TimeText;
     public TextMeshProUGUI AmountText;
+    public LeaderboardManager leaderboard;
 
     void Start()
     {
@@ -24,6 +25,10 @@ public class ResultManager : MonoBehaviourPunCallbacks
         NameText.text = player1Name + " & " + player2Name;
         TimeText.text = timeFormatted;
         AmountText.text = ""+savedPlayCount;
+        if (PhotonNetwork.IsMasterClient){
+            leaderboard.SubmitScore(NameText.text, savedPlayTime, savedPlayCount);
+
+        }
 
 
         PhotonNetwork.AutomaticallySyncScene = false;

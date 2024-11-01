@@ -52,6 +52,9 @@ MonoBehaviour:
   - ChangeToRed
   - ChangeToWarningSprite
   - ResetToDefaultSprite
+  - SyncData
+  - SyncAmount
+  - SyncTime
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

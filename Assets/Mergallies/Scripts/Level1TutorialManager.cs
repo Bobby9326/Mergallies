@@ -35,13 +35,15 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
     private bool findTorch = false; 
     private bool findBottle = false; 
     private bool isSceneLoading = false; 
+    private bool isFinish = false; 
     private Vector3 rock1Position;
     private Vector3 rock2Position;
     private int firstBridge;
     private int secondBridge;
     private int thirdBridge;
-    private float startTime;
+    private float startTime = 0;
     private int amountTime;
+    private GameData gameData = new GameData(0f, 0);
 
     public Vector3[] firstPosition;
     public Vector3[] secondPositions;
@@ -50,10 +52,8 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
     void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
-        PlayerPrefs.SetFloat("playTime", 0f);
-        PlayerPrefs.SetInt("amountTime", 0);
-        amountTime = 0;
         startTime = Time.time;
+
 
         rock1Position = Rock1.transform.position;
         rock2Position = Rock2.transform.position;
@@ -108,8 +108,13 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         float elapsedTime = Time.time - startTime;
         TimeSpan timeSpan = TimeSpan.FromSeconds(elapsedTime);
         string timeFormatted = string.Format("{0:D2}:{1:D2}:{2:D2}", timeSpan.Minutes, timeSpan.Seconds, (timeSpan.Milliseconds / 10));
-        timeText.text = "Time : " + timeFormatted + "\nReturn : " + amountTime;
+        if (PhotonNetwork.IsMasterClient)
+        {
+            photonView.RPC("SyncTime", RpcTarget.All, Time.time - startTime);
+        }
+        timeText.text = "Time : " + timeFormatted + "\nReturn : " + gameData.AmountTime;
         UpdatePlayerCount();
+        CheckIfAllItemsFound();
 
         if (Input.GetKeyDown(KeyCode.R))
         {
@@ -173,11 +178,16 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         SceneManager.LoadScene("MainMenuScene");
     }
     public void OnReturn(){
+        amountTime = gameData.AmountTime;
         amountTime++;
+        photonView.RPC("SyncAmount", RpcTarget.All, amountTime);
+        
     }
     public void Restart()
     {
+        amountTime = gameData.AmountTime;
         amountTime++;
+        photonView.RPC("SyncAmount", RpcTarget.All, amountTime);
         Rock1.transform.position = rock1Position;
         Rock2.transform.position = rock2Position;
         SetBridge();
@@ -293,15 +303,9 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         Debug.Log("พบ Spawn");
         if (findHammer && findFan && findTorch && findBottle)
         {
-            
 
-            // ตรวจสอบว่าเป็น MasterClient หรือไม่
-            if (PhotonNetwork.IsMasterClient)
-            {
-                PlayerPrefs.SetFloat("playTime", Time.time - startTime);
-                PlayerPrefs.SetInt("amountTime", amountTime);
-                photonView.RPC("GoToResultSceneRPC", RpcTarget.All); // เรียกชื่อฟังก์ชัน RPC ที่ถูกต้อง
-            }
+            isFinish = true;
+            
         }
     }
 
@@ -313,12 +317,32 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
             Debug.Log("พบของครบทั้ง 4 ชิ้นแล้ว!");
 
             // ตรวจสอบว่าเป็น MasterClient หรือไม่
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && isFinish)
             {
+                Debug.Log(amountTime);
                 photonView.RPC("GoToResultSceneRPC", RpcTarget.All); // เรียกชื่อฟังก์ชัน RPC ที่ถูกต้อง
             }
         }
     }
+    [PunRPC]
+    void SyncData(float time, int amount)
+    {
+        gameData.AmountTime = amount;
+        gameData.PlayTime = time; 
+    }
+
+
+    [PunRPC]
+    void SyncAmount(int amount)
+    {
+        gameData.AmountTime = amount;
+    }
+    [PunRPC]
+    void SyncTime(float time)
+    {
+        gameData.PlayTime = time; 
+    }
+
 
 
     [PunRPC] // ทำเครื่องหมายฟังก์ชันนี้ว่าเป็น RPC
@@ -334,6 +358,8 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         if (!isSceneLoading)
         {
             isSceneLoading = true;  // ตั้งสถานะว่ากำลังโหลดซีน
+            PlayerPrefs.SetFloat("playTime", gameData.PlayTime);
+            PlayerPrefs.SetInt("amountTime", gameData.AmountTime); 
 
             PhotonNetwork.LoadLevel("ResultScene"); // โหลดฉาก ResultScene
         }
