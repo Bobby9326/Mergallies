@@ -4,10 +4,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System;
 
 public class Level1TutorialManager : MonoBehaviourPunCallbacks
 {
     public TextMeshProUGUI playerCountText;
+    public TextMeshProUGUI timeText;
     public GameObject playerPrefab;
     public Button LeaveButton; 
     public Button MapButton; 
@@ -38,6 +40,9 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
     private int firstBridge;
     private int secondBridge;
     private int thirdBridge;
+    private float startTime;
+    private int amountTime;
+
     public Vector3[] firstPosition;
     public Vector3[] secondPositions;
     public Vector3[] thirdPositions;
@@ -45,11 +50,17 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
     void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
+        PlayerPrefs.SetFloat("playTime", 0f);
+        PlayerPrefs.SetInt("amountTime", 0);
+        amountTime = 0;
+        startTime = Time.time;
+
         rock1Position = Rock1.transform.position;
         rock2Position = Rock2.transform.position;
-        firstBridge = Random.Range(1, 4); 
-        secondBridge = Random.Range(1, 4); 
-        thirdBridge = Random.Range(1, 4); 
+        firstBridge = UnityEngine.Random.Range(1, 4);
+        secondBridge = UnityEngine.Random.Range(1, 4);
+        thirdBridge = UnityEngine.Random.Range(1, 4);
+
 
         firstPosition = new Vector3[]
         {
@@ -94,6 +105,10 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
 
     void Update()
     {
+        float elapsedTime = Time.time - startTime;
+        TimeSpan timeSpan = TimeSpan.FromSeconds(elapsedTime);
+        string timeFormatted = string.Format("{0:D2}:{1:D2}:{2:D2}", timeSpan.Minutes, timeSpan.Seconds, (timeSpan.Milliseconds / 10));
+        timeText.text = "Time : " + timeFormatted + "\nReturn : " + amountTime;
         UpdatePlayerCount();
 
         if (Input.GetKeyDown(KeyCode.R))
@@ -157,8 +172,12 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         
         SceneManager.LoadScene("MainMenuScene");
     }
+    public void OnReturn(){
+        amountTime++;
+    }
     public void Restart()
     {
+        amountTime++;
         Rock1.transform.position = rock1Position;
         Rock2.transform.position = rock2Position;
         SetBridge();
@@ -279,6 +298,8 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
             // ตรวจสอบว่าเป็น MasterClient หรือไม่
             if (PhotonNetwork.IsMasterClient)
             {
+                PlayerPrefs.SetFloat("playTime", Time.time - startTime);
+                PlayerPrefs.SetInt("amountTime", amountTime);
                 photonView.RPC("GoToResultSceneRPC", RpcTarget.All); // เรียกชื่อฟังก์ชัน RPC ที่ถูกต้อง
             }
         }
@@ -313,6 +334,7 @@ public class Level1TutorialManager : MonoBehaviourPunCallbacks
         if (!isSceneLoading)
         {
             isSceneLoading = true;  // ตั้งสถานะว่ากำลังโหลดซีน
+
             PhotonNetwork.LoadLevel("ResultScene"); // โหลดฉาก ResultScene
         }
     }

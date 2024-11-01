@@ -83,6 +83,7 @@ public class PlayerController : MonoBehaviourPun
         if (other.CompareTag("WrongBridge"))
         {
             transform.position = new Vector3(0, 0, 0);
+            gameManager.OnReturn();
         }
     }
 
@@ -114,6 +115,7 @@ public class PlayerController : MonoBehaviourPun
             // ตั้งตำแหน่งของผู้เล่นไปที่ (0, 0)
             Debug.Log("find : Obstacle");
             transform.position = new Vector3(0, 0, 0);
+            gameManager.OnReturn();
         }
         else if (collision.gameObject.CompareTag("Rock"))
         {
