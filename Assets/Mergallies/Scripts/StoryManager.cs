@@ -12,7 +12,7 @@ public class StoryManager : MonoBehaviourPunCallbacks
     public Image storyIMG1;
     public Image storyIMG2;
     public Image storyIMG3;
-    public Image storyIMG4;
+
 
     private int currentImageIndex = 1;
     private int skipCount = 0;
@@ -41,7 +41,7 @@ public class StoryManager : MonoBehaviourPunCallbacks
         storyIMG1.gameObject.SetActive(false);
         storyIMG2.gameObject.SetActive(false);
         storyIMG3.gameObject.SetActive(false);
-        storyIMG4.gameObject.SetActive(false);
+
 
         // แสดงรูปภาพตาม currentImageIndex
         if (currentImageIndex == 1)
@@ -56,10 +56,7 @@ public class StoryManager : MonoBehaviourPunCallbacks
         {
             storyIMG3.gameObject.SetActive(true);
         }
-        else if (currentImageIndex == 4)
-        {
-            storyIMG4.gameObject.SetActive(true);
-        }
+
     }
 
     void UpdateSkipText()
@@ -94,7 +91,7 @@ public class StoryManager : MonoBehaviourPunCallbacks
         Debug.Log("Before: " + currentImageIndex);
         currentImageIndex++;
         Debug.Log("After: " + currentImageIndex);
-        if (currentImageIndex > 4 && !isLoadingScene)
+        if (currentImageIndex > 3 && !isLoadingScene)
         {
             isLoadingScene = true; // ป้องกันการโหลดซ้ำ
             PhotonNetwork.LoadLevel("Level1TutorialScene"); // ไปที่ Scene Game เมื่อกด Next ถึงรูปสุดท้าย
